@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda Alimentar — Mauricio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS — paleta, tipografia, espaçamento
+   ============================================================ */
+:root{
+  --verde-suave: #8FA98F;
+  --verde-fundo: #E9F0E7;
+  --verde-escuro: #43593F;
+  --azul-esverdeado: #4E8B8B;
+  --azul-escuro: #2F5555;
+  --branco: #FBF9F4;
+  --neutro: #F1ECE1;
+  --neutro-borda: #E1D9C8;
+  --texto: #37342C;
+  --texto-suave: #6B6558;
+  --laranja: #E0A05B;
+  --amarelo: #EFC873;
+  --alerta-bg: #FBF3E4;
+  --alerta-borda: #E0A05B;
+  --sombra: 0 2px 10px rgba(55, 52, 44, 0.06);
+  --sombra-forte: 0 6px 24px rgba(55, 52, 44, 0.12);
+  --raio: 18px;
+  --raio-pequeno: 10px;
+  --fonte-display: 'Fraunces', 'Georgia', serif;
+  --fonte-corpo: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+*{ box-sizing: border-box; }
+
+html{ scroll-behavior: smooth; }
+
+body{
+  margin:0;
+  background: var(--branco);
+  color: var(--texto);
+  font-family: var(--fonte-corpo);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg{ display:block; max-width:100%; }
+
+button{
+  font-family: inherit;
+  cursor: pointer;
+}
+
+:focus-visible{
+  outline: 3px solid var(--azul-esverdeado);
+  outline-offset: 2px;
+}
+
+.container{
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+
+/* ============================================================
+   CABEÇALHO
+   ============================================================ */
+.topo{
+  background: linear-gradient(160deg, var(--verde-fundo) 0%, var(--branco) 65%);
+  border-bottom: 1px solid var(--neutro-borda);
+  padding: 28px 20px 20px;
+}
+
+.topo-conteudo{
+  max-width: 900px;
+  margin: 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.identidade{ display:flex; align-items:center; gap:16px; }
+
+.saudacao h1{
+  font-family: var(--fonte-display);
+  font-size: 1.55rem;
+  font-weight: 600;
+  margin: 0 0 2px;
+  color: var(--verde-escuro);
+}
+
+.saudacao p{
+  margin:0;
+  font-size: 0.92rem;
+  color: var(--texto-suave);
+  text-transform: capitalize;
+}
+
+/* Elemento assinatura: o "prato do dia" — prato que vai se preenchendo
+   conforme as refeições do dia são marcadas como realizadas. */
+.prato-dia{
+  position: relative;
+  width: 74px;
+  height: 74px;
+  flex-shrink: 0;
+}
+.prato-dia svg{ width:100%; height:100%; }
+.prato-dia .prato-legenda{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family: var(--fonte-display);
+  font-weight:600;
+  font-size: 0.95rem;
+  color: var(--verde-escuro);
+}
+
+.abas-visao{
+  display:flex;
+  gap:8px;
+  max-width:900px;
+  margin: 18px auto 0;
+  flex-wrap: wrap;
+}
+.aba-visao{
+  border:1px solid var(--neutro-borda);
+  background: var(--branco);
+  color: var(--texto-suave);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all .15s ease;
+}
+.aba-visao.ativa{
+  background: var(--verde-escuro);
+  border-color: var(--verde-escuro);
+  color: var(--branco);
+}
+.aba-visao:hover:not(.ativa){ background: var(--neutro); }
+
+/* Navegação dos dias da semana */
+.dias-semana{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding: 18px 20px 4px;
+  max-width: 900px;
+  margin: 0 auto;
+  scrollbar-width: thin;
+}
+.dia-botao{
+  flex: 0 0 auto;
+  border: 1.5px solid var(--neutro-borda);
+  background: var(--branco);
+  color: var(--texto);
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 92px;
+  text-align:center;
+  transition: all .15s ease;
+}
+.dia-botao .dia-sub{
+  display:block;
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: var(--texto-suave);
+  margin-top:2px;
+}
+.dia-botao.ativo{
+  background: var(--azul-esverdeado);
+  border-color: var(--azul-esverdeado);
+  color: var(--branco);
+}
+.dia-botao.ativo .dia-sub{ color: rgba(255,255,255,0.85); }
+.dia-botao.hoje:not(.ativo){ border-color: var(--laranja); }
+.dia-botao:hover:not(.ativo){ border-color: var(--azul-esverdeado); }
+
+/* ============================================================
+   SEÇÕES / BLOCOS DE REFEIÇÃO
+   ============================================================ */
+main{ max-width: 900px; margin: 0 auto; padding: 24px 20px 10px; }
+
+.secao{ margin-bottom: 30px; }
+
+.secao-titulo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom: 12px;
+}
+.secao-titulo .icone{
+  width: 34px; height:34px;
+  display:flex; align-items:center; justify-content:center;
+  background: var(--verde-fundo);
+  border-radius: 10px;
+  color: var(--verde-escuro);
+  flex-shrink:0;
+}
+.secao-titulo h2{
+  font-family: var(--fonte-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin:0;
+  color: var(--verde-escuro);
+}
+
+.cartao{
+  background: var(--branco);
+  border: 1px solid var(--neutro-borda);
+  border-radius: var(--raio);
+  padding: 20px;
+  box-shadow: var(--sombra);
+  margin-bottom: 14px;
+}
+
+.cartao-topo{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cartao-topo h3{
+  font-family: var(--fonte-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.tempo-preparo{
+  font-size: 0.78rem;
+  color: var(--texto-suave);
+  white-space: nowrap;
+  padding-top: 3px;
+}
+
+.lista-ingredientes{
+  list-style: none;
+  margin: 10px 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.lista-ingredientes li{
+  font-size: 0.92rem;
+  padding-left: 18px;
+  position: relative;
+}
+.lista-ingredientes li::before{
+  content: "•";
+  color: var(--azul-esverdeado);
+  position:absolute;
+  left: 2px;
+  font-weight: 700;
+}
+.lista-ingredientes .gramas{
+  color: var(--texto-suave);
+  font-size: 0.85em;
+}
+
+.preparo-texto{
+  font-size: 0.88rem;
+  color: var(--texto-suave);
+  margin: 8px 0;
+}
+
+.aviso-adaptacao{
+  display:inline-block;
+  background: var(--alerta-bg);
+  border: 1px solid var(--alerta-borda);
+  color: #8a5b1f;
+  font-size: 0.78rem;
+  padding: 5px 10px;
+  border-radius: 999px;
+  margin: 6px 0;
+}
+
+.pode-adiantar{
+  font-size: 0.8rem;
+  color: var(--azul-escuro);
+  margin: 4px 0 0;
+}
+
+.cartao-acoes{
+  display:flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  align-items:center;
+}
+
+.botao{
+  border: none;
+  border-radius: 12px;
+  padding: 11px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all .15s ease;
+}
+.botao-primario{
+  background: var(--verde-escuro);
+  color: var(--branco);
+}
+.botao-primario:hover{ background: #354b31; }
+.botao-primario.feito{
+  background: var(--azul-esverdeado);
+}
+.botao-secundario{
+  background: var(--neutro);
+  color: var(--texto);
+  border: 1px solid var(--neutro-borda);
+}
+.botao-secundario:hover{ background: var(--neutro-borda); }
+.botao-fantasma{
+  background: transparent;
+  color: var(--azul-escuro);
+  border: 1px solid var(--azul-esverdeado);
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+.botao-fantasma:hover{ background: var(--verde-fundo); }
+.botao-grande{ padding: 14px 22px; font-size: 0.95rem; }
+.botao-perigo{
+  background: transparent;
+  color: #a05030;
+  border: 1px solid #d9b79a;
+}
+
+.selo-realizada{
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--azul-escuro);
+  display:flex;
+  align-items:center;
+  gap: 6px;
+}
+
+/* Selects de status simples (lanche da manhã, ceia) */
+.status-simples{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+}
+.status-opcao{
+  border: 1.5px solid var(--neutro-borda);
+  background: var(--branco);
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--texto);
+}
+.status-opcao.selecionada{
+  background: var(--verde-fundo);
+  border-color: var(--verde-escuro);
+  color: var(--verde-escuro);
+  font-weight: 600;
+}
+
+/* Blocos de fome/saciedade e observações */
+.registro-bloco{
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--neutro-borda);
+}
+.registro-titulo{
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--texto-suave);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+}
+.chip{
+  border: 1.5px solid var(--neutro-borda);
+  background: var(--branco);
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+.chip.selecionado{
+  background: var(--laranja);
+  border-color: var(--laranja);
+  color: var(--branco);
+  font-weight: 600;
+}
+
+textarea.observacao{
+  width:100%;
+  border: 1.5px solid var(--neutro-borda);
+  border-radius: var(--raio-pequeno);
+  padding: 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 70px;
+  margin-top: 8px;
+  background: var(--branco);
+  color: var(--texto);
+}
+
+/* Legumes: mini-tags dentro do card de almoço */
+.legumes-tags{ display:flex; flex-wrap:wrap; gap:8px; margin: 6px 0; }
+.legume-tag{
+  background: var(--verde-fundo);
+  color: var(--verde-escuro);
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.meta-progressiva{
+  background: var(--verde-fundo);
+  border-radius: var(--raio-pequeno);
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  color: var(--verde-escuro);
+  margin-top: 10px;
+}
+
+/* Água */
+.agua-cartao{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 20px;
+  align-items:center;
+  justify-content:space-between;
+}
+.copos-grade{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+}
+.copo{
+  width: 40px; height: 46px;
+  border: 2px solid var(--azul-esverdeado);
+  border-radius: 6px 6px 10px 10px;
+  background: var(--branco);
+  position: relative;
+  overflow:hidden;
+  padding:0;
+}
+.copo.cheio{ background: var(--azul-esverdeado); }
+.copo.cheio::after{
+  content: "";
+}
+.agua-resumo{ text-align:right; }
+.agua-resumo .agua-numero{
+  font-family: var(--fonte-display);
+  font-size: 1.6rem;
+  color: var(--azul-escuro);
+  font-weight: 600;
+}
+.agua-config{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+.agua-config input{
+  width: 56px;
+  padding: 6px 8px;
+  border: 1px solid var(--neutro-borda);
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+/* Suplementação */
+.supl-linha{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--neutro-borda);
+}
+.supl-linha:last-child{ border-bottom:none; }
+
+/* Lista de compras */
+.compras-categoria{ margin-bottom: 20px; }
+.compras-categoria h3{
+  font-family: var(--fonte-display);
+  font-size: 1rem;
+  color: var(--verde-escuro);
+  margin: 0 0 10px;
+}
+.compras-item{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--neutro-borda);
+  font-size: 0.92rem;
+}
+.compras-item input[type=checkbox]{ width:18px; height:18px; accent-color: var(--verde-escuro); flex-shrink:0; }
+.compras-item.marcado span{ text-decoration: line-through; color: var(--texto-suave); }
+.compras-aprox{ font-size:0.78rem; color: var(--texto-suave); }
+
+/* Preparo semanal */
+.preparo-item{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--neutro-borda);
+}
+.preparo-item input[type=checkbox]{ width:18px; height:18px; accent-color: var(--verde-escuro); }
+.preparo-item.marcado span{ text-decoration: line-through; color: var(--texto-suave); }
+
+/* Resumo semanal */
+.resumo-grade{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.resumo-card{
+  background: var(--neutro);
+  border-radius: var(--raio-pequeno);
+  padding: 14px;
+  text-align:center;
+}
+.resumo-card .num{
+  font-family: var(--fonte-display);
+  font-size: 1.5rem;
+  color: var(--verde-escuro);
+  font-weight:600;
+}
+.resumo-card .rotulo{ font-size: 0.78rem; color: var(--texto-suave); }
+
+.resumo-frase{
+  background: var(--verde-fundo);
+  border-radius: var(--raio-pequeno);
+  padding: 16px;
+  font-family: var(--fonte-display);
+  font-style: italic;
+  color: var(--verde-escuro);
+  text-align:center;
+  margin-bottom: 20px;
+}
+
+.resumo-dia-linha{
+  font-size: 0.88rem;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--neutro-borda);
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+
+/* Barra de ações do topo do dia (imprimir / restaurar) */
+.barra-acoes-topo{
+  display:flex;
+  justify-content:flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+/* Rodapé */
+footer{
+  max-width: 900px;
+  margin: 20px auto 0;
+  padding: 24px 20px 40px;
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--neutro-borda);
+}
+footer p{ margin: 0 0 8px; }
+footer .frase-acolhedora{
+  font-family: var(--fonte-display);
+  font-style: italic;
+  color: var(--verde-escuro);
+  font-size: 0.95rem;
+  margin-bottom: 14px;
+}
+
+/* Modal de confirmação */
+.modal-fundo{
+  position: fixed; inset:0;
+  background: rgba(55,52,44,0.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index: 100;
+  padding: 20px;
+}
+.modal-fundo.aberto{ display:flex; }
+.modal{
+  background: var(--branco);
+  border-radius: var(--raio);
+  padding: 26px;
+  max-width: 420px;
+  box-shadow: var(--sombra-forte);
+}
+.modal h3{ font-family: var(--fonte-display); margin-top:0; color: var(--verde-escuro); }
+.modal-acoes{ display:flex; gap:10px; justify-content:flex-end; margin-top: 18px; }
+
+/* Toast */
+.toast{
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--verde-escuro);
+  color: var(--branco);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  box-shadow: var(--sombra-forte);
+  opacity: 0;
+  pointer-events:none;
+  transition: all .25s ease;
+  z-index: 200;
+}
+.toast.mostrar{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+.escondido{ display:none !important; }
+
+/* Impressão */
+@media print{
+  .topo, .abas-visao, .dias-semana, .barra-acoes-topo, .cartao-acoes button, footer, .toast{ display:none !important; }
+  .cartao{ box-shadow:none; border: 1px solid #ccc; break-inside: avoid; }
+  body{ background: white; }
+}
+
+@media (max-width: 640px){
+  .saudacao h1{ font-size: 1.3rem; }
+  .cartao{ padding:16px; }
+  .agua-cartao{ flex-direction:column; align-items:flex-start; }
+  .agua-resumo{ text-align:left; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     CABEÇALHO: identidade, prato do dia, abas de visão, dias
+     ============================================================ -->
+<div class="topo">
+  <div class="topo-conteudo">
+    <div class="identidade">
+      <div class="prato-dia" aria-hidden="true">
+        <svg viewBox="0 0 74 74">
+          <circle cx="37" cy="37" r="33" fill="none" stroke="#E1D9C8" stroke-width="7"/>
+          <circle id="anelPrato" cx="37" cy="37" r="33" fill="none" stroke="#4E8B8B" stroke-width="7"
+                  stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="207"
+                  transform="rotate(-90 37 37)"/>
+        </svg>
+        <div class="prato-legenda" id="pratoLegenda">0/6</div>
+      </div>
+      <div class="saudacao">
+        <h1 id="tituloSaudacao">Olá, Mauricio</h1>
+        <p id="dataAtual"></p>
+      </div>
+    </div>
+  </div>
+
+  <nav class="abas-visao" id="abasVisao" aria-label="Seções do site">
+    <button class="aba-visao ativa" data-visao="dia">📅 Meu dia</button>
+    <button class="aba-visao" data-visao="compras">🛒 Lista de compras</button>
+    <button class="aba-visao" data-visao="preparo">🍲 Preparo da semana</button>
+    <button class="aba-visao" data-visao="resumo">📝 Resumo semanal</button>
+    <button class="aba-visao" data-visao="relatorio">📊 Relatório mensal</button>
+  </nav>
+</div>
+
+<nav class="dias-semana" id="diasSemana" aria-label="Dias da semana"></nav>
+
+<main>
+
+  <!-- ================= VISÃO: DIA ================= -->
+  <section id="visaoDia">
+    <div class="barra-acoes-topo">
+      <button class="botao botao-fantasma" id="btnImprimirDia">🖨️ Imprimir cardápio</button>
+      <button class="botao botao-fantasma" id="btnRestaurar">↺ Restaurar cardápio original</button>
+    </div>
+
+    <!-- Café da manhã -->
+    <div class="secao">
+      <div class="secao-titulo"><span class="icone">☕</span><h2>Café da manhã</h2></div>
+      <div id="blocoCafe"></div>
+    </div>
+
+    <!-- Água da manhã -->
+    <div class="secao">
+      <div class="secao-titulo"><span class="icone">💧</span><h2>Água durante a manhã</h2></div>
+      <div class="cartao" id="blocoAguaManha"></div>
+    </div>
+
+    <!-- Lanche da manhã -->
+    <div class="secao">
+      <div class="secao-titulo"><span class="icone">🍵</span><h2>Lanche da manhã / chá</h2></div>
+      <div class="cartao" id="blocoLancheManha"></div>
+    </div>
+
+    <!-- Almoço -->
+    <div class="secao">
+      <div class="secao-titulo"><span class="icone">🍚</span><h2>Almoço</h2></div>
+      <div id="blocoAlmoco"></div>
+    </div>
+
+    <!-- Água da tarde -->
+    <div class="secao">
+      <div class="secao-titulo"><span class="icone">💧</span><h2>Água durante a tarde</h2></div>
+      <div class="cartao" id="blocoAguaTarde"></div>
+    </div>
+
+    <!-- Lanche da tarde -->
+    <div class="secao">
+      <div class="secao-titulo"><span class="icone">🥪</span><h2>Lanche da tarde</h2></div>
+      <div id="blocoLancheTarde"></div>
+    </div>
+
+    <!-- Jantar -->
+    <div class="secao">
+      <div class="secao-titulo"><span class="icone">🌙</span><h2>Jantar</h2></div>
+      <div id="blocoJantar"></div>
+    </div>
+
+    <!-- Ceia -->
+    <div class="secao">
+      <div class="secao-titulo"><span class="icone">🌌</span><h2>Ceia (opcional)</h2></div>
+      <div class="cartao" id="blocoCeia"></div>
+    </div>
+
+    <!-- Suplementação -->
+    <div class="secao">
+      <div class="secao-titulo"><span class="icone">💊</span><h2>Suplementação</h2></div>
+      <div class="cartao" id="blocoSuplementos"></div>
+    </div>
+
+    <!-- Observações do dia -->
+    <div class="secao">
+      <div class="secao-titulo"><span class="icone">📝</span><h2>Observações do dia</h2></div>
+      <div class="cartao">
+        <textarea class="observacao" id="observacaoDia" placeholder="Fome, saciedade, dificuldades com alguma refeição..."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VISÃO: LISTA DE COMPRAS ================= -->
+  <section id="visaoCompras" class="escondido">
+    <div class="barra-acoes-topo">
+      <button class="botao botao-fantasma" id="btnImprimirCompras">🖨️ Imprimir lista</button>
+    </div>
+    <p style="color:var(--texto-suave); font-size:0.9rem;">Calculada automaticamente a partir das opções escolhidas nos 7 dias da semana.</p>
+    <div id="listaCompras"></div>
+  </section>
+
+  <!-- ================= VISÃO: PREPARO DA SEMANA ================= -->
+  <section id="visaoPreparo" class="escondido">
+    <p style="color:var(--texto-suave); font-size:0.9rem;">Sugestões simples para deixar pronto e economizar tempo durante a semana.</p>
+    <div class="cartao">
+      <div id="listaPreparo"></div>
+    </div>
+  </section>
+
+  <!-- ================= VISÃO: RESUMO SEMANAL ================= -->
+  <section id="visaoResumo" class="escondido">
+    <div class="barra-acoes-topo">
+      <button class="botao botao-fantasma" id="btnImprimirResumo">🖨️ Imprimir resumo</button>
+      <button class="botao botao-perigo" id="btnLimparRegistros">Limpar apenas os registros da semana</button>
+    </div>
+    <div class="resumo-frase">"Seu progresso não precisa ser perfeito. Cada refeição é uma nova oportunidade."</div>
+    <div class="resumo-grade" id="resumoGrade"></div>
+    <div class="cartao">
+      <h3 style="font-family:var(--fonte-display); margin-top:0; color:var(--verde-escuro);">Refeições realizadas na semana</h3>
+      <div id="resumoDias"></div>
+    </div>
+  </section>
+
+  <!-- ================= VISÃO: RELATÓRIO MENSAL ================= -->
+  <section id="visaoRelatorio" class="escondido">
+    <div class="barra-acoes-topo">
+      <button class="botao botao-fantasma" id="btnImprimirRelatorio">🖨️ Imprimir relatório</button>
+    </div>
+    <div class="cartao" style="margin-bottom:16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <label for="seletorMes" style="font-size:0.85rem; color:var(--texto-suave); font-weight:600;">Mês do relatório</label>
+      <input type="month" id="seletorMes" style="padding:9px 12px; border:1.5px solid var(--neutro-borda); border-radius:10px; font-family:inherit; font-size:0.9rem;">
+    </div>
+    <div class="resumo-frase" id="relatorioFraseTopo"></div>
+    <div class="resumo-grade" id="relatorioGrade"></div>
+    <div class="cartao">
+      <h3 style="font-family:var(--fonte-display); margin-top:0; color:var(--verde-escuro);">Como foram as refeições</h3>
+      <div id="relatorioAvaliacoes"></div>
+    </div>
+    <div class="cartao">
+      <h3 style="font-family:var(--fonte-display); margin-top:0; color:var(--verde-escuro);">Dia a dia do mês</h3>
+      <div id="relatorioDias"></div>
+    </div>
+    <p style="font-size:0.8rem; color:var(--texto-suave);">Este relatório é só para o seu acompanhamento pessoal — pode ser um bom ponto de partida para conversar com a nutricionista no retorno.</p>
+  </section>
+
+</main>
+
+<footer>
+  <p class="frase-acolhedora" id="fraseRodape"></p>
+  <p>Esta ferramenta organiza um plano alimentar elaborado anteriormente por nutricionista. As adaptações devem ser apresentadas à profissional no retorno, especialmente se houver alteração de peso, exames, rotina, objetivos ou condições de saúde.</p>
+  <p>Não force alimentos que causem rejeição intensa. Registre as dificuldades para conversar com a nutricionista.</p>
+</footer>
+
+<!-- Modal de confirmação (restaurar cardápio) -->
+<div class="modal-fundo" id="modalConfirmacao">
+  <div class="modal">
+    <h3>Restaurar cardápio original?</h3>
+    <p>Isso vai desfazer todas as trocas de refeições feitas na semana. Água, observações e registros não serão apagados.</p>
+    <div class="modal-acoes">
+      <button class="botao botao-secundario" id="btnCancelarRestaurar">Cancelar</button>
+      <button class="botao botao-primario" id="btnConfirmarRestaurar">Restaurar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================================
+   AGENDA ALIMENTAR — Mauricio
+   Ferramenta de organização de um plano alimentar já elaborado por
+   nutricionista. Não realiza cálculo de calorias/macros e não substitui
+   orientação profissional.
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------
+   1. PERFIL E SELETIVIDADE (apenas referência / uso interno)
+   ---------------------------------------------------------------------- */
+const perfil = {
+  nome: "Mauricio",
+  observacaoGeral: "Seletividade alimentar. Alimentos aceitos preservados; alimentos rejeitados nunca aparecem nas refeições."
+};
+
+const alimentosAceitos = {
+  cafeELanches: ["Pão", "Ovo", "Queijo", "Presunto/peito de peru (ocasional)", "Iogurte", "Leite", "Whey protein", "Maçã", "Laranja (alguns dias)", "Aveia", "Tapioca", "Cereal ou granola"],
+  almocoJantar: ["Arroz", "Feijão", "Macarrão (ocasional)", "Batata", "Batata-doce", "Purê", "Frango", "Carne bovina", "Carne moída", "Carne suína (ocasional)", "Hambúrguer caseiro"],
+  vegetais: ["Cenoura crua", "Cenoura cozida", "Brócolis", "Abóbora", "Milho", "Ervilha"]
+};
+
+const alimentosRejeitados = {
+  frutas: ["Banana", "Morango", "Mamão", "Melão"],
+  proteinas: ["Peixe", "Sardinha", "Atum", "Ovo no almoço/jantar"],
+  vegetais: ["Alface", "Tomate", "Pepino", "Couve-flor", "Beterraba", "Folhas verdes em geral"],
+  outros: ["Saladas com frutas misturadas", "Uva-passa", "Muitas sementes misturadas", "Combinações muito sofisticadas"]
+};
+
+const NOTA_ADAPTACAO = "Adaptação prática — validar com a nutricionista.";
+
+/* ----------------------------------------------------------------------
+   2. BANCO DE OPÇÕES — CAFÉ DA MANHÃ
+   ---------------------------------------------------------------------- */
+const cafeDaManha = {
+  A: {
+    id: "A", nome: "Pão com ovos",
+    ingredientes: [
+      { item: "Pão integral", medida: "2 fatias" },
+      { item: "Ovos mexidos", medida: "2 unidades" },
+      { item: "Maçã média", medida: "1 unidade" },
+      { item: "Café", medida: "1 xícara" }
+    ],
+    preparo: "Fazer os ovos mexidos e consumir com o pão. Servir a maçã separadamente.",
+    tempo: "10 min",
+    grupoVisual: "ovos"
+  },
+  B: {
+    id: "B", nome: "Pão com creme de queijo",
+    ingredientes: [
+      { item: "Pão integral", medida: "2 fatias" },
+      { item: "Creme de queijo ou geleia sem açúcar", medida: "1 ponta de faca" },
+      { item: "Maçã média (ou, em dias com laranja liberada, suco de laranja)", medida: "1 unidade / 175 ml" },
+      { item: "Café", medida: "1 xícara" }
+    ],
+    preparo: "Passar o creme de queijo no pão. Em dias que a laranja for aceita, pode substituir a maçã por suco de laranja; chia e gengibre são sempre opcionais, nunca obrigatórios.",
+    tempo: "5 min",
+    grupoVisual: "pao-creme"
+  },
+  C: {
+    id: "C", nome: "Bebida proteica",
+    ingredientes: [
+      { item: "Leite", medida: "1 copo", gramas: "≈200 ml" },
+      { item: "Whey protein", medida: "1 dose" },
+      { item: "Aveia", medida: "1 colher de sopa" },
+      { item: "Cacau em pó", medida: "1 colher de chá" },
+      { item: "Chia (opcional)", medida: "a gosto" },
+      { item: "Maçã média, consumida separadamente (não bater na bebida)", medida: "1 unidade" }
+    ],
+    preparo: "Bater leite, whey, aveia e cacau. A maçã é servida à parte, nunca batida junto.",
+    tempo: "5 min",
+    aviso: "Utilizar somente se esta combinação estiver de acordo com a orientação atual da nutricionista.",
+    grupoVisual: "bebida"
+  },
+  D: {
+    id: "D", nome: "Pão de frigideira",
+    ingredientes: [
+      { item: "Ovo", medida: "1 unidade" },
+      { item: "Farelo de aveia", medida: "1 colher de sopa" },
+      { item: "Fermento químico", medida: "1 colher de café" },
+      { item: "Azeite para untar", medida: "pequena quantidade" },
+      { item: "Queijo", medida: "1 fatia" },
+      { item: "Maçã média", medida: "1 unidade" },
+      { item: "Café", medida: "1 xícara" }
+    ],
+    preparo: "Misturar ovo, aveia e fermento. Colocar em frigideira untada, dourar dos dois lados e adicionar o queijo.",
+    tempo: "10 min",
+    grupoVisual: "frigideira"
+  }
+};
+
+/* ----------------------------------------------------------------------
+   3. ALMOÇO — pools de proteína, carboidrato e legumes
+   ---------------------------------------------------------------------- */
+const feijaoPadrao = { item: "Feijão preto", medida: "1 concha e meia pequena" };
+
+const proteinasPool = {
+  frango: { id: "frango", nome: "Peito de frango grelhado, cozido ou assado", medida: "1 filé médio" },
+  carneBovina: { id: "carneBovina", nome: "Carne bovina grelhada, cozida ou assada", medida: "porção do plano" },
+  carneMoida: { id: "carneMoida", nome: "Carne moída", medida: "porção equivalente à carne" },
+  carneSuina: { id: "carneSuina", nome: "Carne suína", medida: "porção do plano", aviso: "Carne suína apenas ocasionalmente." }
+};
+const ordemProteinas = ["frango", "carneBovina", "carneMoida", "carneSuina"];
+
+const carboidratosPool = {
+  arroz: { id: "arroz", nome: "Arroz branco ou integral", medida: "3 colheres de sopa" },
+  batata: { id: "batata", nome: "Batata cozida ou assada", medida: "1 unidade média" },
+  abobora: { id: "abobora", nome: "Abóbora cabotiá", medida: "3 colheres de sopa" },
+  pure: { id: "pure", nome: "Purê de batata", medida: "feito com 1 batata média" },
+  macarrao: { id: "macarrao", nome: "Macarrão", medida: "porção equivalente", aviso: NOTA_ADAPTACAO }
+};
+const ordemCarboidratos = ["arroz", "batata", "abobora", "pure", "macarrao"];
+
+const legumesPool = {
+  cenouraCrua: { id: "cenouraCrua", nome: "Cenoura crua ralada" },
+  cenouraCozida: { id: "cenouraCozida", nome: "Cenoura cozida" },
+  brocolis: { id: "brocolis", nome: "Brócolis" },
+  abobora: { id: "abobora", nome: "Abóbora" },
+  ervilha: { id: "ervilha", nome: "Ervilha" }
+};
+// pares de legumes usados na rotação (3 colheres e meia de sopa cheias, no total)
+const paresLegumes = [
+  ["cenouraCozida", "brocolis"], ["abobora", "cenouraCozida"], ["brocolis", "ervilha"],
+  ["cenouraCozida", "ervilha"], ["brocolis", "abobora"], ["ervilha", "cenouraCrua"]
+];
+
+/* ----------------------------------------------------------------------
+   4. LANCHE DA TARDE
+   ---------------------------------------------------------------------- */
+const lanchesTarde = {
+  A: {
+    id: "A", nome: "Iogurte com aveia",
+    ingredientes: [
+      { item: "Iogurte", medida: "1 unidade", gramas: "170 g" },
+      { item: "Aveia (ou granola em alguns dias)", medida: "≈1 colher de sopa", gramas: "15 g" },
+      { item: "Farinha de linhaça (opcional)", medida: "opcional", gramas: "7,5 g" }
+    ],
+    preparo: "Misturar o iogurte com a aveia (ou granola). Não misturar frutas dentro do iogurte; a maçã, quando prevista, é servida separadamente.",
+    tempo: "3 min",
+    grupoVisual: "iogurte"
+  },
+  B: {
+    id: "B", nome: "Tapioca com frango e queijo",
+    ingredientes: [
+      { item: "Goma de tapioca", medida: "≈3 colheres e meia", gramas: "52,5 g" },
+      { item: "Queijo", medida: "—", gramas: "40 g" },
+      { item: "Frango desfiado", medida: "—", gramas: "≈88 g" },
+      { item: "Orégano (opcional)", medida: "a gosto" }
+    ],
+    preparo: "Fazer a tapioca na frigideira e rechear com frango desfiado e queijo.",
+    tempo: "10 min",
+    grupoVisual: "tapioca"
+  },
+  C: {
+    id: "C", nome: "Sanduíche natural adaptado",
+    ingredientes: [
+      { item: "Pão integral", medida: "2 fatias" },
+      { item: "Frango cozido e desfiado", medida: "—", gramas: "100 g" },
+      { item: "Creme de queijo", medida: "1 colher de sopa" },
+      { item: "Cenoura ralada (quando aceita dentro do sanduíche)", medida: "meia unidade" }
+    ],
+    preparo: "Montar o sanduíche com o frango, o creme de queijo e a cenoura (ou servir a cenoura à parte). Sem alface, tomate, pepino, brotos ou folhas.",
+    tempo: "5 min",
+    grupoVisual: "sanduiche"
+  },
+  D: {
+    id: "D", nome: "Lanche de emergência",
+    ingredientes: [
+      { item: "Pão integral", medida: "2 fatias" },
+      { item: "Queijo", medida: "1 fatia" },
+      { item: "Presunto ou peito de peru", medida: "pequena quantidade" },
+      { item: "Maçã", medida: "1 unidade" }
+    ],
+    preparo: "Montar o sanduíche frio. Uso ocasional, para dias muito corridos.",
+    tempo: "3 min",
+    aviso: "Opção prática e ocasional. Priorizar frango, queijo, iogurte ou outras preparações caseiras nos demais dias.",
+    grupoVisual: "emergencia"
+  }
+};
+
+/* ----------------------------------------------------------------------
+   5. JANTAR
+   ---------------------------------------------------------------------- */
+const jantares = {
+  A: {
+    id: "A", nome: "Tapioca com frango e queijo",
+    ingredientes: [
+      { item: "Goma de tapioca", medida: "≈3 colheres e meia", gramas: "52,5 g" },
+      { item: "Queijo", medida: "—", gramas: "40 g" },
+      { item: "Frango desfiado", medida: "—", gramas: "≈88 g" },
+      { item: "Cenoura, brócolis, abóbora ou ervilha", medida: "3 colheres e meia de sopa" }
+    ],
+    preparo: "Preparar a tapioca e rechear com frango desfiado e queijo. Servir o vegetal como acompanhamento.",
+    tempo: "10 min",
+    grupoVisual: "tapioca"
+  },
+  B: {
+    id: "B", nome: "Sanduíche quente de frango",
+    ingredientes: [
+      { item: "Pão integral", medida: "2 fatias" },
+      { item: "Frango cozido e desfiado", medida: "—", gramas: "100 g" },
+      { item: "Creme de queijo", medida: "1 colher de sopa" },
+      { item: "Cenoura ralada", medida: "meia unidade" }
+    ],
+    preparo: "Montar e preparar na sanduicheira, frigideira ou airfryer.",
+    tempo: "10 min",
+    grupoVisual: "sanduiche"
+  },
+  C: {
+    id: "C", nome: "Batata recheada",
+    ingredientes: [
+      { item: "Batata média", medida: "1 unidade" },
+      { item: "Frango desfiado", medida: "—", gramas: "100 g" },
+      { item: "Queijo", medida: "—", gramas: "40 g" },
+      { item: "Brócolis, cenoura, abóbora ou ervilha", medida: "3 colheres e meia de sopa" }
+    ],
+    preparo: "Cozinhar ou assar a batata, abrir ao meio e acrescentar frango e queijo. Pode usar batata previamente cozida.",
+    tempo: "15–20 min (ou menos, se a batata já estiver cozida)",
+    aviso: NOTA_ADAPTACAO,
+    podeAdiantar: true,
+    grupoVisual: "batata"
+  },
+  D: {
+    id: "D", nome: "Hambúrguer caseiro",
+    ingredientes: [
+      { item: "Hambúrguer de carne magra (caseiro: carne moída, cenoura ralada, farelo de aveia, ovo para liga, temperos simples)", medida: "—", gramas: "150 g" },
+      { item: "Batata média assada ou na airfryer", medida: "1 unidade" },
+      { item: "Cenoura, brócolis, abóbora ou ervilha", medida: "3 colheres e meia de sopa" }
+    ],
+    preparo: "Assar o hambúrguer e a batata. Sem alface, tomate, picles ou cebola crua no prato.",
+    tempo: "20 min",
+    variacaoOpcional: "Versão com pão e queijo — validar com a nutricionista.",
+    grupoVisual: "hamburguer"
+  },
+  E: {
+    id: "E", nome: "Purê com carne moída",
+    ingredientes: [
+      { item: "Purê de batata", medida: "feito com 1 batata média (ou porção equivalente)" },
+      { item: "Carne moída", medida: "porção equivalente ao filé médio do plano" },
+      { item: "Cenoura, brócolis, abóbora ou ervilha", medida: "3 colheres e meia de sopa" }
+    ],
+    preparo: "Deixar pronto com antecedência e apenas aquecer na hora.",
+    tempo: "5 min para aquecer",
+    aviso: NOTA_ADAPTACAO,
+    podeAdiantar: true,
+    grupoVisual: "pure"
+  }
+};
+
+/* ----------------------------------------------------------------------
+   6. CARDÁPIO INICIAL DA SEMANA (configuração padrão / "de fábrica")
+   ---------------------------------------------------------------------- */
+const diasInfo = [
+  { chave: "segunda", nome: "Segunda-feira", curto: "Seg" },
+  { chave: "terca", nome: "Terça-feira", curto: "Ter" },
+  { chave: "quarta", nome: "Quarta-feira", curto: "Qua" },
+  { chave: "quinta", nome: "Quinta-feira", curto: "Qui" },
+  { chave: "sexta", nome: "Sexta-feira", curto: "Sex" },
+  { chave: "sabado", nome: "Sábado", curto: "Sáb" },
+  { chave: "domingo", nome: "Domingo", curto: "Dom" }
+];
+
+const cardapioOriginal = {
+  segunda: { cafe: "A", almoco: { proteina: "frango", carboidrato: "arroz", legumes: ["cenouraCozida", "brocolis"] }, lancheTarde: "A", jantar: "A" },
+  terca:   { cafe: "B", almoco: { proteina: "carneBovina", carboidrato: "batata", legumes: ["abobora", "cenouraCozida"] }, lancheTarde: "C", jantar: "B" },
+  quarta:  { cafe: "C", almoco: { proteina: "frango", carboidrato: "arroz", legumes: ["brocolis", "ervilha"] }, lancheTarde: "B", jantar: "D" },
+  quinta:  { cafe: "A", almoco: { proteina: "carneMoida", carboidrato: "arroz", legumes: ["cenouraCozida", "ervilha"] }, lancheTarde: "A", jantar: "C" },
+  sexta:   { cafe: "B", almoco: { proteina: "frango", carboidrato: "arroz", legumes: ["brocolis", "abobora"] }, lancheTarde: "C", jantar: "A" },
+  sabado:  { cafe: "D", almoco: { proteina: "carneBovina", carboidrato: "batata", legumes: ["cenouraCozida", "ervilha"] }, lancheTarde: "A", jantar: "D" },
+  domingo: { cafe: "C", almoco: { proteina: "frango", carboidrato: "arroz", legumes: ["brocolis", "cenouraCozida"] }, lancheTarde: null, jantar: "B" }
+};
+
+/* ----------------------------------------------------------------------
+   7. PREPARO SEMANAL (itens sugeridos)
+   ---------------------------------------------------------------------- */
+const itensPreparoSemanal = [
+  "Cozinhar e desfiar frango",
+  "Separar porções de frango de aproximadamente 88 g e 100 g",
+  "Preparar hambúrgueres caseiros de 150 g",
+  "Cozinhar algumas batatas",
+  "Preparar uma porção de carne moída",
+  "Higienizar e ralar cenouras",
+  "Cozinhar brócolis",
+  "Preparar abóbora",
+  "Separar porções de ervilha",
+  "Organizar iogurtes",
+  "Separar aveia ou granola em porções de 15 g",
+  "Conferir pão, queijo, maçãs, tapioca e leite"
+];
+
+/* ----------------------------------------------------------------------
+   8. ESTRUTURA PRINCIPAL DE DADOS (objeto exigido pela especificação)
+   ---------------------------------------------------------------------- */
+const planoAlimentar = {
+  perfil: perfil,
+  cafeDaManha: cafeDaManha,
+  almocos: { proteinasPool, carboidratosPool, legumesPool, feijaoPadrao },
+  lanches: lanchesTarde,
+  jantares: jantares,
+  semana: cardapioOriginal
+};
+
+/* ----------------------------------------------------------------------
+   9. ESTADO — carregado do localStorage
+   ---------------------------------------------------------------------- */
+const CHAVE_ESTADO = "agendaAlimentarMauricio_v2";
+
+// "estado.dias" guarda apenas o MODELO do cardápio (trocas por dia da semana,
+// ex: "toda quarta virou opção B"). Isso se repete todas as semanas.
+function estadoDiaPadrao(){
+  return {
+    cafe: null, lancheTarde: null, jantar: null, almoco: null // trocas (null = usar o original)
+  };
+}
+
+// "estado.registros" guarda o HISTÓRICO real, por data (AAAA-MM-DD). É isso
+// que alimenta o relatório mensal — cada dia vivido fica registrado e não é
+// sobrescrito quando a semana seguinte começa.
+function registroPadrao(dataISO, diaChave){
+  return {
+    data: dataISO,
+    diaSemana: diaChave,
+    realizadas: { cafe:false, lancheManha:false, almoco:false, lancheTarde:false, jantar:false, ceia:false },
+    lancheManhaStatus: null, // 'realizado' | 'naoNecessario' | 'semFome'
+    ceiaStatus: null, // 'tomei' | 'naoNecessario'
+    copos: 0,
+    observacao: "",
+    fome: {}, // { cafe: 'poucaFome', almoco: ... }
+    saciedade: {}, // pós-refeição
+    avaliacao: {}, // gostei / textura / etc, por refeição (array de tags)
+    suplementos: { creatina: false, whey: false },
+    nomesRefeicoes: {} // snapshot do nome da preparação no momento em que foi marcada
+  };
+}
+
+function estadoPadraoCompleto(){
+  const dias = {};
+  diasInfo.forEach(d => { dias[d.chave] = estadoDiaPadrao(); });
+  return {
+    diaSelecionado: diaDeHoje(),
+    metaAgua: 8,
+    dias: dias,
+    registros: {},
+    comprasMarcadas: {},
+    preparoMarcado: {}
+  };
+}
+
+function diaDeHoje(){
+  const mapa = [ "domingo","segunda","terca","quarta","quinta","sexta","sabado" ];
+  return mapa[new Date().getDay()];
+}
+
+function carregarEstado(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_ESTADO);
+    if(!bruto) return estadoPadraoCompleto();
+    const salvo = JSON.parse(bruto);
+    const base = estadoPadraoCompleto();
+    // mescla superficial garantindo que todos os dias/registros existam mesmo se o formato mudar
+    return Object.assign(base, salvo, {
+      dias: Object.assign(base.dias, salvo.dias || {}),
+      registros: Object.assign({}, salvo.registros || {})
+    });
+  }catch(e){
+    console.error("Não foi possível carregar os dados salvos:", e);
+    return estadoPadraoCompleto();
+  }
+}
+
+let estado = carregarEstado();
+
+function salvarEstado(){
+  try{
+    localStorage.setItem(CHAVE_ESTADO, JSON.stringify(estado));
+  }catch(e){
+    console.error("Não foi possível salvar os dados:", e);
+    mostrarToast("Não foi possível salvar agora. Verifique o espaço do navegador.");
+  }
+}
+
+/* ----------------------------------------------------------------------
+   10. FUNÇÕES DE APOIO — resolver a refeição "efetiva" do dia
+   ---------------------------------------------------------------------- */
+function estadoDoDia(diaChave){ return estado.dias[diaChave]; }
+
+// --- Datas: cada aba (Segunda...Domingo) representa o dia correspondente
+// DA SEMANA ATUAL. Assim, ao virar a semana, novos registros são criados
+// automaticamente por data, preservando o histórico das semanas anteriores.
+function doisDigitos(n){ return String(n).padStart(2, "0"); }
+function formatarISO(d){ return d.getFullYear() + "-" + doisDigitos(d.getMonth()+1) + "-" + doisDigitos(d.getDate()); }
+function inicioDaSemana(data){
+  const d = new Date(data);
+  const diaSemanaNum = d.getDay(); // 0=domingo...6=sábado
+  const diff = (diaSemanaNum === 0) ? -6 : (1 - diaSemanaNum);
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function dataISODoDia(diaChave){
+  const segunda = inicioDaSemana(new Date());
+  const idx = diasInfo.findIndex(d => d.chave === diaChave);
+  const dt = new Date(segunda);
+  dt.setDate(segunda.getDate() + idx);
+  return formatarISO(dt);
+}
+
+// Cria (se necessário) e retorna o registro histórico do dia — usar quando
+// for de fato registrar/alterar algo.
+function registroDoDia(diaChave){
+  const dataISO = dataISODoDia(diaChave);
+  if(!estado.registros[dataISO]){
+    estado.registros[dataISO] = registroPadrao(dataISO, diaChave);
+  }
+  return estado.registros[dataISO];
+}
+// Leitura sem criar um registro novo (evita "sujar" dias futuros da semana
+// só por exibir contadores na barra de navegação).
+function obterRegistro(diaChave){
+  const dataISO = dataISODoDia(diaChave);
+  return estado.registros[dataISO] || registroPadrao(dataISO, diaChave);
+}
+
+function cafeEfetivo(diaChave){
+  const troca = estadoDoDia(diaChave).cafe;
+  const idOriginal = cardapioOriginal[diaChave].cafe;
+  return cafeDaManha[troca || idOriginal];
+}
+function lancheTardeEfetivo(diaChave){
+  const troca = estadoDoDia(diaChave).lancheTarde;
+  const idOriginal = cardapioOriginal[diaChave].lancheTarde;
+  const id = troca || idOriginal;
+  return id ? lanchesTarde[id] : null;
+}
+function jantarEfetivo(diaChave){
+  const troca = estadoDoDia(diaChave).jantar;
+  const idOriginal = cardapioOriginal[diaChave].jantar;
+  return jantares[troca || idOriginal];
+}
+function almocoEfetivo(diaChave){
+  const troca = estadoDoDia(diaChave).almoco;
+  return troca || cardapioOriginal[diaChave].almoco;
+}
+
+function diaAnteriorChave(diaChave){
+  const idx = diasInfo.findIndex(d => d.chave === diaChave);
+  const idxAnterior = (idx - 1 + 7) % 7;
+  return diasInfo[idxAnterior].chave;
+}
+
+/* ----------------------------------------------------------------------
+   11. FUNÇÃO "TROCAR OPÇÃO"
+   ---------------------------------------------------------------------- */
+function proximoId(idsOrdenados, idAtual){
+  const idx = idsOrdenados.indexOf(idAtual);
+  return idsOrdenados[(idx + 1) % idsOrdenados.length];
+}
+
+function trocarCafe(diaChave){
+  const ids = ["A","B","C","D"];
+  const atualId = estadoDoDia(diaChave).cafe || cardapioOriginal[diaChave].cafe;
+  const anteriorDia = cafeDaManha[cardapioOriginal[diaAnteriorChave(diaChave)].cafe]; // referência simples
+  let candidato = proximoId(ids, atualId);
+  // evita repetir exatamente a opção já usada no dia anterior, quando possível
+  let tentativas = 0;
+  while(candidato === (estadoDoDia(diaAnteriorChave(diaChave)).cafe || cardapioOriginal[diaAnteriorChave(diaChave)].cafe) && tentativas < 4){
+    candidato = proximoId(ids, candidato);
+    tentativas++;
+  }
+  estadoDoDia(diaChave).cafe = candidato;
+  salvarEstado();
+  renderizarDia();
+  mostrarToast("Café da manhã trocado para: " + cafeDaManha[candidato].nome);
+}
+
+function trocarLancheOuJantar(diaChave, categoria){
+  // categoria: 'lancheTarde' ou 'jantar'
+  const banco = categoria === "lancheTarde" ? lanchesTarde : jantares;
+  const ids = Object.keys(banco);
+  const atualId = estadoDoDia(diaChave)[categoria] || cardapioOriginal[diaChave][categoria];
+  const idAnteriorDoMesmoDia = categoria === "jantar" ? (estadoDoDia(diaChave).lancheTarde || cardapioOriginal[diaChave].lancheTarde) : null;
+  const grupoVisualEvitar = idAnteriorDoMesmoDia ? lanchesTarde[idAnteriorDoMesmoDia].grupoVisual : null;
+
+  const diaAnt = diaAnteriorChave(diaChave);
+  const idOntem = estadoDoDia(diaAnt)[categoria] || cardapioOriginal[diaAnt][categoria];
+
+  let candidato = proximoId(ids, atualId);
+  let tentativas = 0;
+  while(tentativas < ids.length){
+    const opc = banco[candidato];
+    const igualOntem = candidato === idOntem;
+    const igualVisualLancheDoDia = grupoVisualEvitar && opc.grupoVisual === grupoVisualEvitar;
+    if(!igualOntem && !igualVisualLancheDoDia) break;
+    candidato = proximoId(ids, candidato);
+    tentativas++;
+  }
+  estadoDoDia(diaChave)[categoria] = candidato;
+  salvarEstado();
+  renderizarDia();
+  const rotulo = categoria === "lancheTarde" ? "Lanche da tarde" : "Jantar";
+  mostrarToast(rotulo + " trocado para: " + banco[candidato].nome);
+}
+
+function trocarAlmocoProteina(diaChave){
+  const atual = almocoEfetivo(diaChave);
+  const novo = Object.assign({}, atual, { proteina: proximoId(ordemProteinas, atual.proteina) });
+  estadoDoDia(diaChave).almoco = novo;
+  salvarEstado(); renderizarDia();
+  mostrarToast("Proteína trocada: " + proteinasPool[novo.proteina].nome);
+}
+function trocarAlmocoCarboidrato(diaChave){
+  const atual = almocoEfetivo(diaChave);
+  const novo = Object.assign({}, atual, { carboidrato: proximoId(ordemCarboidratos, atual.carboidrato) });
+  estadoDoDia(diaChave).almoco = novo;
+  salvarEstado(); renderizarDia();
+  mostrarToast("Carboidrato trocado: " + carboidratosPool[novo.carboidrato].nome);
+}
+function trocarAlmocoLegumes(diaChave){
+  const atual = almocoEfetivo(diaChave);
+  const atualStr = JSON.stringify([...atual.legumes].sort());
+  let idx = paresLegumes.findIndex(p => JSON.stringify([...p].sort()) === atualStr);
+  idx = (idx + 1) % paresLegumes.length;
+  const novo = Object.assign({}, atual, { legumes: paresLegumes[idx] });
+  estadoDoDia(diaChave).almoco = novo;
+  salvarEstado(); renderizarDia();
+  mostrarToast("Legumes trocados.");
+}
+
+/* ----------------------------------------------------------------------
+   12. RENDERIZAÇÃO — cabeçalho, dias, prato do dia
+   ---------------------------------------------------------------------- */
+const nomesMeses = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+
+function renderizarCabecalho(){
+  document.getElementById("tituloSaudacao").textContent = "Olá, " + perfil.nome;
+  const hoje = new Date();
+  const diaSemanaTexto = diasInfo.find(d => d.chave === diaDeHoje())?.nome || "";
+  document.getElementById("dataAtual").textContent =
+    diaSemanaTexto + ", " + hoje.getDate() + " de " + nomesMeses[hoje.getMonth()] + " de " + hoje.getFullYear();
+}
+
+function renderizarDiasSemana(){
+  const nav = document.getElementById("diasSemana");
+  nav.innerHTML = "";
+  diasInfo.forEach(d => {
+    const btn = document.createElement("button");
+    btn.className = "dia-botao" + (d.chave === estado.diaSelecionado ? " ativo" : "") + (d.chave === diaDeHoje() ? " hoje" : "");
+    const st = obterRegistro(d.chave);
+    const feitas = Object.values(st.realizadas).filter(Boolean).length;
+    btn.innerHTML = d.curto + '<span class="dia-sub">' + feitas + '/6 feitas</span>';
+    btn.setAttribute("aria-pressed", d.chave === estado.diaSelecionado ? "true" : "false");
+    btn.addEventListener("click", () => {
+      estado.diaSelecionado = d.chave;
+      salvarEstado();
+      renderizarDia();
+      renderizarDiasSemana();
+    });
+    nav.appendChild(btn);
+  });
+}
+
+function atualizarPratoDoDia(){
+  const st = obterRegistro(estado.diaSelecionado);
+  const chaves = ["cafe","lancheManha","almoco","lancheTarde","jantar","ceia"];
+  const feitas = chaves.filter(c => st.realizadas[c]).length;
+  const total = 6;
+  const circunferencia = 2 * Math.PI * 33;
+  const offset = circunferencia - (feitas/total) * circunferencia;
+  document.getElementById("anelPrato").setAttribute("stroke-dasharray", circunferencia.toFixed(1));
+  document.getElementById("anelPrato").setAttribute("stroke-dashoffset", offset.toFixed(1));
+  document.getElementById("pratoLegenda").textContent = feitas + "/" + total;
+}
+
+/* ----------------------------------------------------------------------
+   13. RENDERIZAÇÃO — blocos de refeição
+   ---------------------------------------------------------------------- */
+function linhaIngrediente(ing){
+  let texto = ing.item;
+  if(ing.medida) texto += " — " + ing.medida;
+  const gramasHtml = ing.gramas ? ' <span class="gramas">(' + ing.gramas + ')</span>' : "";
+  return "<li>" + texto + gramasHtml + "</li>";
+}
+
+function nomeAtualDaRefeicao(diaChave, chaveRefeicao){
+  if(chaveRefeicao === "cafe") return cafeEfetivo(diaChave).nome;
+  if(chaveRefeicao === "lancheTarde"){ const o = lancheTardeEfetivo(diaChave); return o ? o.nome : "Opcional"; }
+  if(chaveRefeicao === "jantar") return jantarEfetivo(diaChave).nome;
+  if(chaveRefeicao === "almoco"){
+    const alm = almocoEfetivo(diaChave);
+    return proteinasPool[alm.proteina].nome + " + " + carboidratosPool[alm.carboidrato].nome;
+  }
+  return "";
+}
+
+function marcarRealizada(diaChave, chaveRefeicao, botao){
+  const st = registroDoDia(diaChave);
+  st.realizadas[chaveRefeicao] = !st.realizadas[chaveRefeicao];
+  if(st.realizadas[chaveRefeicao]){
+    st.nomesRefeicoes[chaveRefeicao] = nomeAtualDaRefeicao(diaChave, chaveRefeicao);
+  }
+  salvarEstado();
+  renderizarDia();
+  renderizarDiasSemana();
+  if(st.realizadas[chaveRefeicao]){
+    const frases = ["Feito é melhor que perfeito.", "Cada refeição é uma nova oportunidade.", "Registrado com carinho."];
+    mostrarToast(frases[Math.floor(Math.random()*frases.length)]);
+  }
+}
+
+function blocoRegistro(diaChave, chaveRefeicao){
+  const st = registroDoDia(diaChave);
+  const opcoesFomeAntes = ["Não senti fome","Pouca fome","Fome moderada","Muita fome"];
+  const opcoesSaciedade = ["Ainda fiquei com fome","Fiquei satisfeito","Comi além do necessário","Não consegui terminar"];
+  const opcoesAvaliacao = ["Gostei da refeição","Aceitei, mas não é minha preferida","Não quero repetir","A textura incomodou","O sabor incomodou","Foi difícil preparar","Foi fácil e prático"];
+
+  function chips(lista, grupo, valorAtual){
+    return lista.map(op =>
+      '<button class="chip' + (valorAtual === op ? ' selecionado' : '') + '" data-grupo="' + grupo + '" data-valor="' + op + '" data-refeicao="' + chaveRefeicao + '">' + op + '</button>'
+    ).join("");
+  }
+
+  const fomeAtual = st.fome[chaveRefeicao];
+  const saciedadeAtual = st.saciedade[chaveRefeicao];
+  const avaliacaoAtual = st.avaliacao[chaveRefeicao] || [];
+
+  return `
+    <div class="registro-bloco">
+      <div class="registro-titulo">Antes de comer</div>
+      <div class="chips">${chips(opcoesFomeAntes, "fome", fomeAtual)}</div>
+      <div class="registro-titulo" style="margin-top:12px;">Depois de comer</div>
+      <div class="chips">${chips(opcoesSaciedade, "saciedade", saciedadeAtual)}</div>
+      <div class="registro-titulo" style="margin-top:12px;">Como foi</div>
+      <div class="chips">${opcoesAvaliacao.map(op => '<button class="chip' + (avaliacaoAtual.includes(op) ? ' selecionado' : '') + '" data-grupo="avaliacao" data-valor="' + op + '" data-refeicao="' + chaveRefeicao + '">' + op + '</button>').join("")}</div>
+    </div>
+  `;
+}
+
+function renderizarCafe(){
+  const diaChave = estado.diaSelecionado;
+  const opc = cafeEfetivo(diaChave);
+  const st = registroDoDia(diaChave);
+  const feito = st.realizadas.cafe;
+  document.getElementById("blocoCafe").innerHTML = `
+    <div class="cartao">
+      <div class="cartao-topo">
+        <h3>${opc.nome}</h3>
+        <span class="tempo-preparo">⏱ ${opc.tempo}</span>
+      </div>
+      <ul class="lista-ingredientes">${opc.ingredientes.map(linhaIngrediente).join("")}</ul>
+      <p class="preparo-texto">${opc.preparo}</p>
+      ${opc.aviso ? '<div class="aviso-adaptacao">' + opc.aviso + '</div>' : ''}
+      <div class="cartao-acoes">
+        <button class="botao ${feito ? 'botao-primario feito' : 'botao-primario'}" id="btnFeitoCafe">${feito ? '✓ Realizado' : 'Marcar como realizado'}</button>
+        <button class="botao botao-secundario" id="btnTrocarCafe">🔄 Trocar opção</button>
+      </div>
+      ${blocoRegistro(diaChave, "cafe")}
+    </div>
+  `;
+  document.getElementById("btnFeitoCafe").addEventListener("click", (e) => marcarRealizada(diaChave, "cafe", e.target));
+  document.getElementById("btnTrocarCafe").addEventListener("click", () => trocarCafe(diaChave));
+}
+
+function renderizarAgua(idElemento, periodo){
+  const diaChave = estado.diaSelecionado;
+  const st = registroDoDia(diaChave);
+  const meta = estado.metaAgua;
+  // divide a meta em manhã/tarde apenas para exibição (metade em cada bloco, arredondado)
+  const metaPeriodo = periodo === "manha" ? Math.ceil(meta/2) : Math.floor(meta/2);
+  const inicioIndice = periodo === "manha" ? 0 : Math.ceil(meta/2);
+  let coposHtml = "";
+  for(let i=0; i<metaPeriodo; i++){
+    const indiceGlobal = inicioIndice + i;
+    const cheio = indiceGlobal < st.copos;
+    coposHtml += '<button class="copo ' + (cheio ? 'cheio' : '') + '" data-indice="' + indiceGlobal + '" aria-label="Copo ' + (indiceGlobal+1) + '"></button>';
+  }
+  const percentual = meta > 0 ? Math.min(100, Math.round((st.copos/meta)*100)) : 0;
+  document.getElementById(idElemento).innerHTML = `
+    <div class="agua-cartao">
+      <div class="copos-grade">${coposHtml}</div>
+      <div class="agua-resumo">
+        <div class="agua-numero">${st.copos}/${meta}</div>
+        <div style="font-size:0.8rem; color:var(--texto-suave);">${percentual}% da meta</div>
+      </div>
+    </div>
+    ${periodo === "manha" ? `<div class="agua-config">
+      Meta diária de copos: <input type="number" id="inputMetaAgua" min="1" max="20" value="${meta}">
+    </div>` : ""}
+  `;
+  document.querySelectorAll("#" + idElemento + " .copo").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.dataset.indice, 10);
+      st.copos = (idx < st.copos) ? idx : idx + 1;
+      if(st.copos < 0) st.copos = 0;
+      salvarEstado();
+      renderizarAguaManha();
+      renderizarAguaTarde();
+    });
+  });
+  if(periodo === "manha"){
+    document.getElementById("inputMetaAgua").addEventListener("change", (e) => {
+      const v = parseInt(e.target.value, 10);
+      estado.metaAgua = (v && v > 0) ? v : 8;
+      salvarEstado();
+      renderizarAguaManha();
+      renderizarAguaTarde();
+    });
+  }
+}
+function renderizarAguaManha(){ renderizarAgua("blocoAguaManha", "manha"); }
+function renderizarAguaTarde(){ renderizarAgua("blocoAguaTarde", "tarde"); }
+
+function renderizarLancheManha(){
+  const diaChave = estado.diaSelecionado;
+  const st = registroDoDia(diaChave);
+  const opcoes = [
+    { valor: "realizado", rotulo: "Realizado" },
+    { valor: "naoNecessario", rotulo: "Não necessário" },
+    { valor: "semFome", rotulo: "Não senti fome" }
+  ];
+  document.getElementById("blocoLancheManha").innerHTML = `
+    <p class="preparo-texto" style="margin-top:0;">1 xícara de chá de uma variedade aceita, ou apenas água. Chá, gengibre, alecrim, hortelã ou carqueja nunca são obrigatórios.</p>
+    <div class="status-simples">
+      ${opcoes.map(o => '<button class="status-opcao' + (st.lancheManhaStatus === o.valor ? ' selecionada' : '') + '" data-valor="' + o.valor + '">' + o.rotulo + '</button>').join("")}
+    </div>
+  `;
+  document.querySelectorAll("#blocoLancheManha .status-opcao").forEach(btn => {
+    btn.addEventListener("click", () => {
+      st.lancheManhaStatus = btn.dataset.valor;
+      st.realizadas.lancheManha = (btn.dataset.valor === "realizado");
+      salvarEstado();
+      renderizarLancheManha();
+      renderizarDiasSemana();
+      atualizarPratoDoDia();
+    });
+  });
+}
+
+function renderizarAlmoco(){
+  const diaChave = estado.diaSelecionado;
+  const alm = almocoEfetivo(diaChave);
+  const st = registroDoDia(diaChave);
+  const feito = st.realizadas.almoco;
+  const proteina = proteinasPool[alm.proteina];
+  const carbo = carboidratosPool[alm.carboidrato];
+  const legumesTags = alm.legumes.map(id => '<span class="legume-tag">' + legumesPool[id].nome + '</span>').join("");
+
+  document.getElementById("blocoAlmoco").innerHTML = `
+    <div class="cartao">
+      <div class="cartao-topo"><h3>Prato do almoço</h3></div>
+      <ul class="lista-ingredientes">
+        <li>${proteina.nome} — ${proteina.medida}</li>
+        <li>${carbo.nome} — ${carbo.medida}</li>
+        <li>${feijaoPadrao.item} — ${feijaoPadrao.medida}</li>
+      </ul>
+      <div class="registro-titulo">Legumes (3 colheres e meia de sopa no total)</div>
+      <div class="legumes-tags">${legumesTags}</div>
+      ${proteina.aviso ? '<div class="aviso-adaptacao">' + proteina.aviso + '</div>' : ''}
+      ${carbo.aviso ? '<div class="aviso-adaptacao">' + carbo.aviso + '</div>' : ''}
+      <div class="meta-progressiva">Começar com a quantidade aceita e aumentar a variedade aos poucos, sem forçar alimentos que provoquem rejeição.</div>
+      <div class="cartao-acoes">
+        <button class="botao ${feito ? 'botao-primario feito' : 'botao-primario'}" id="btnFeitoAlmoco">${feito ? '✓ Realizado' : 'Marcar como realizado'}</button>
+        <button class="botao botao-secundario" id="btnTrocarProteina">🔄 Trocar proteína</button>
+        <button class="botao botao-secundario" id="btnTrocarCarbo">🔄 Trocar carboidrato</button>
+        <button class="botao botao-secundario" id="btnTrocarLegumes">🔄 Trocar legumes</button>
+      </div>
+      ${blocoRegistro(diaChave, "almoco")}
+    </div>
+  `;
+  document.getElementById("btnFeitoAlmoco").addEventListener("click", () => marcarRealizada(diaChave, "almoco"));
+  document.getElementById("btnTrocarProteina").addEventListener("click", () => trocarAlmocoProteina(diaChave));
+  document.getElementById("btnTrocarCarbo").addEventListener("click", () => trocarAlmocoCarboidrato(diaChave));
+  document.getElementById("btnTrocarLegumes").addEventListener("click", () => trocarAlmocoLegumes(diaChave));
+}
+
+function renderizarLancheTarde(){
+  const diaChave = estado.diaSelecionado;
+  const opc = lancheTardeEfetivo(diaChave);
+  const st = registroDoDia(diaChave);
+  const feito = st.realizadas.lancheTarde;
+  if(!opc){
+    document.getElementById("blocoLancheTarde").innerHTML = `
+      <div class="cartao">
+        <p class="preparo-texto" style="margin:0;">Opcional neste dia, conforme fome.</p>
+        <div class="cartao-acoes">
+          <button class="botao ${feito ? 'botao-primario feito' : 'botao-primario'}" id="btnFeitoLancheTarde">${feito ? '✓ Realizado' : 'Marcar como realizado'}</button>
+        </div>
+      </div>`;
+    document.getElementById("btnFeitoLancheTarde").addEventListener("click", () => marcarRealizada(diaChave, "lancheTarde"));
+    return;
+  }
+  document.getElementById("blocoLancheTarde").innerHTML = `
+    <div class="cartao">
+      <div class="cartao-topo">
+        <h3>${opc.nome}</h3>
+        <span class="tempo-preparo">⏱ ${opc.tempo}</span>
+      </div>
+      <ul class="lista-ingredientes">${opc.ingredientes.map(linhaIngrediente).join("")}</ul>
+      <p class="preparo-texto">${opc.preparo}</p>
+      ${opc.aviso ? '<div class="aviso-adaptacao">' + opc.aviso + '</div>' : ''}
+      <div class="cartao-acoes">
+        <button class="botao ${feito ? 'botao-primario feito' : 'botao-primario'}" id="btnFeitoLancheTarde">${feito ? '✓ Realizado' : 'Marcar como realizado'}</button>
+        <button class="botao botao-secundario" id="btnTrocarLancheTarde">🔄 Trocar opção</button>
+      </div>
+      ${blocoRegistro(diaChave, "lancheTarde")}
+    </div>
+  `;
+  document.getElementById("btnFeitoLancheTarde").addEventListener("click", () => marcarRealizada(diaChave, "lancheTarde"));
+  document.getElementById("btnTrocarLancheTarde").addEventListener("click", () => trocarLancheOuJantar(diaChave, "lancheTarde"));
+}
+
+function renderizarJantar(){
+  const diaChave = estado.diaSelecionado;
+  const opc = jantarEfetivo(diaChave);
+  const st = registroDoDia(diaChave);
+  const feito = st.realizadas.jantar;
+  document.getElementById("blocoJantar").innerHTML = `
+    <div class="cartao">
+      <div class="cartao-topo">
+        <h3>${opc.nome}</h3>
+        <span class="tempo-preparo">⏱ ${opc.tempo}</span>
+      </div>
+      <ul class="lista-ingredientes">${opc.ingredientes.map(linhaIngrediente).join("")}</ul>
+      <p class="preparo-texto">${opc.preparo}</p>
+      ${opc.podeAdiantar ? '<p class="pode-adiantar">✓ Pode ser deixado pronto com antecedência.</p>' : ''}
+      ${opc.aviso ? '<div class="aviso-adaptacao">' + opc.aviso + '</div>' : ''}
+      ${opc.variacaoOpcional ? '<div class="aviso-adaptacao">' + opc.variacaoOpcional + '</div>' : ''}
+      <div class="cartao-acoes">
+        <button class="botao ${feito ? 'botao-primario feito' : 'botao-primario'}" id="btnFeitoJantar">${feito ? '✓ Realizado' : 'Marcar como realizado'}</button>
+        <button class="botao botao-secundario" id="btnTrocarJantar">🔄 Trocar opção</button>
+      </div>
+      ${blocoRegistro(diaChave, "jantar")}
+    </div>
+  `;
+  document.getElementById("btnFeitoJantar").addEventListener("click", () => marcarRealizada(diaChave, "jantar"));
+  document.getElementById("btnTrocarJantar").addEventListener("click", () => trocarLancheOuJantar(diaChave, "jantar"));
+}
+
+function renderizarCeia(){
+  const diaChave = estado.diaSelecionado;
+  const st = registroDoDia(diaChave);
+  const opcoes = [
+    { valor: "tomei", rotulo: "Tomei meia dose de whey" },
+    { valor: "naoNecessario", rotulo: "Não necessário" }
+  ];
+  document.getElementById("blocoCeia").innerHTML = `
+    <p class="preparo-texto" style="margin-top:0;">Meia dose de whey protein, apenas em dias muito corridos. Não é obrigatória.</p>
+    <div class="status-simples">
+      ${opcoes.map(o => '<button class="status-opcao' + (st.ceiaStatus === o.valor ? ' selecionada' : '') + '" data-valor="' + o.valor + '">' + o.rotulo + '</button>').join("")}
+    </div>
+  `;
+  document.querySelectorAll("#blocoCeia .status-opcao").forEach(btn => {
+    btn.addEventListener("click", () => {
+      st.ceiaStatus = btn.dataset.valor;
+      st.realizadas.ceia = (btn.dataset.valor === "tomei");
+      salvarEstado();
+      renderizarCeia();
+      renderizarDiasSemana();
+      atualizarPratoDoDia();
+    });
+  });
+}
+
+function renderizarSuplementos(){
+  const diaChave = estado.diaSelecionado;
+  const st = registroDoDia(diaChave);
+  document.getElementById("blocoSuplementos").innerHTML = `
+    <div class="supl-linha">
+      <span>Creatina (diariamente, conforme orientação da nutricionista)</span>
+      <input type="checkbox" id="checkCreatina" ${st.suplementos.creatina ? "checked" : ""} style="width:20px;height:20px;accent-color:var(--verde-escuro);">
+    </div>
+    <div class="supl-linha">
+      <span>Whey protein (conforme refeições selecionadas)</span>
+      <input type="checkbox" id="checkWhey" ${st.suplementos.whey ? "checked" : ""} style="width:20px;height:20px;accent-color:var(--verde-escuro);">
+    </div>
+    <p style="font-size:0.8rem; color:var(--texto-suave); margin-top:12px; margin-bottom:0;">Utilizar suplementos apenas conforme orientação profissional já recebida.</p>
+  `;
+  document.getElementById("checkCreatina").addEventListener("change", (e) => {
+    st.suplementos.creatina = e.target.checked;
+    salvarEstado();
+  });
+  document.getElementById("checkWhey").addEventListener("change", (e) => {
+    st.suplementos.whey = e.target.checked;
+    salvarEstado();
+  });
+}
+
+function renderizarObservacao(){
+  const diaChave = estado.diaSelecionado;
+  const st = registroDoDia(diaChave);
+  const campo = document.getElementById("observacaoDia");
+  campo.value = st.observacao || "";
+  campo.oninput = () => {
+    st.observacao = campo.value;
+    salvarEstado();
+  };
+}
+
+function ligarChipsDeRegistro(){
+  document.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const diaChave = estado.diaSelecionado;
+      const st = registroDoDia(diaChave);
+      const grupo = chip.dataset.grupo;
+      const valor = chip.dataset.valor;
+      const refeicao = chip.dataset.refeicao;
+      if(grupo === "fome"){
+        st.fome[refeicao] = (st.fome[refeicao] === valor) ? null : valor;
+      } else if(grupo === "saciedade"){
+        st.saciedade[refeicao] = (st.saciedade[refeicao] === valor) ? null : valor;
+      } else if(grupo === "avaliacao"){
+        const atual = st.avaliacao[refeicao] || [];
+        if(atual.includes(valor)){
+          st.avaliacao[refeicao] = atual.filter(v => v !== valor);
+        } else {
+          st.avaliacao[refeicao] = [...atual, valor];
+        }
+      }
+      salvarEstado();
+      renderizarDia();
+    });
+  });
+}
+
+function renderizarDia(){
+  renderizarCafe();
+  renderizarAguaManha();
+  renderizarLancheManha();
+  renderizarAlmoco();
+  renderizarAguaTarde();
+  renderizarLancheTarde();
+  renderizarJantar();
+  renderizarCeia();
+  renderizarSuplementos();
+  renderizarObservacao();
+  ligarChipsDeRegistro();
+  atualizarPratoDoDia();
+}
+
+/* ----------------------------------------------------------------------
+   14. LISTA DE COMPRAS AUTOMÁTICA
+   ---------------------------------------------------------------------- */
+function gerarListaDeCompras(){
+  // contadores agregados pela semana inteira
+  const cont = {
+    fatiasPao: 0, ovos: 0, macas: 0, iogurtes170g: 0, leiteMl: 0, dosesWhey: 0,
+    tapiocaG: 0, queijoG: 0, frangoG: 0, frangoFiles: 0, carneBovinaPorcoes: 0,
+    carneMoidaPorcoes: 0, carneSuinaPorcoes: 0, hamburgueresUnid: 0, batatas: 0,
+    colheresArroz: 0, colheresAbobora: 0, conchasFeijao: 0, colheresLegumes: 0,
+    aveiaColheres: 0, presuntoOcasional: 0, cafeXicaras: 0, creamCheese: 0,
+    macarraoOcasional: 0, pureBatata: 0
+  };
+
+  diasInfo.forEach(d => {
+    const cafe = cafeEfetivo(d.chave);
+    const lanche = lancheTardeEfetivo(d.chave);
+    const jantar = jantarEfetivo(d.chave);
+    const almoco = almocoEfetivo(d.chave);
+
+    // café
+    if(cafe.id === "A"){ cont.fatiasPao+=2; cont.ovos+=2; cont.macas+=1; cont.cafeXicaras+=1; }
+    if(cafe.id === "B"){ cont.fatiasPao+=2; cont.creamCheese+=1; cont.macas+=1; cont.cafeXicaras+=1; }
+    if(cafe.id === "C"){ cont.leiteMl+=200; cont.dosesWhey+=1; cont.aveiaColheres+=1; cont.macas+=1; }
+    if(cafe.id === "D"){ cont.ovos+=1; cont.queijoG+=15; cont.macas+=1; cont.cafeXicaras+=1; cont.aveiaColheres+=1; }
+
+    // lanche da tarde
+    if(lanche){
+      if(lanche.id === "A"){ cont.iogurtes170g+=1; cont.aveiaColheres+=1; }
+      if(lanche.id === "B"){ cont.tapiocaG+=52.5; cont.queijoG+=40; cont.frangoG+=88; }
+      if(lanche.id === "C"){ cont.fatiasPao+=2; cont.frangoG+=100; cont.creamCheese+=1; }
+      if(lanche.id === "D"){ cont.fatiasPao+=2; cont.queijoG+=20; cont.presuntoOcasional+=1; cont.macas+=1; }
+    }
+
+    // jantar
+    if(jantar.id === "A"){ cont.tapiocaG+=52.5; cont.queijoG+=40; cont.frangoG+=88; cont.colheresLegumes+=3.5; }
+    if(jantar.id === "B"){ cont.fatiasPao+=2; cont.frangoG+=100; cont.creamCheese+=1; cont.colheresLegumes+=0; }
+    if(jantar.id === "C"){ cont.batatas+=1; cont.frangoG+=100; cont.queijoG+=40; cont.colheresLegumes+=3.5; }
+    if(jantar.id === "D"){ cont.hamburgueresUnid+=1; cont.batatas+=1; cont.colheresLegumes+=3.5; }
+    if(jantar.id === "E"){ cont.pureBatata+=1; cont.carneMoidaPorcoes+=1; cont.colheresLegumes+=3.5; }
+
+    // almoço
+    if(almoco.proteina === "frango") cont.frangoFiles += 1;
+    if(almoco.proteina === "carneBovina") cont.carneBovinaPorcoes += 1;
+    if(almoco.proteina === "carneMoida") cont.carneMoidaPorcoes += 1;
+    if(almoco.proteina === "carneSuina") cont.carneSuinaPorcoes += 1;
+    if(almoco.carboidrato === "arroz") cont.colheresArroz += 3;
+    if(almoco.carboidrato === "batata") cont.batatas += 1;
+    if(almoco.carboidrato === "abobora") cont.colheresAbobora += 3;
+    if(almoco.carboidrato === "pure") cont.pureBatata += 1;
+    if(almoco.carboidrato === "macarrao") cont.macarraoOcasional += 1;
+    cont.conchasFeijao += 1.5;
+    cont.colheresLegumes += 3.5;
+  });
+
+  const categorias = [
+    { titulo: "Pães e cereais", itens: [
+      { nome: "Pão integral (fatias)", qtd: cont.fatiasPao },
+      { nome: "Aveia / farelo de aveia (colheres de sopa)", qtd: cont.aveiaColheres },
+      { nome: "Cereal ou granola", qtd: null, aprox: true }
+    ]},
+    { titulo: "Proteínas", itens: [
+      { nome: "Ovos (unidades)", qtd: cont.ovos },
+      { nome: "Peito de frango (filés)", qtd: cont.frangoFiles },
+      { nome: "Frango para desfiar (gramas)", qtd: Math.round(cont.frangoG) },
+      { nome: "Carne bovina (porções)", qtd: cont.carneBovinaPorcoes },
+      { nome: "Carne moída (porções)", qtd: cont.carneMoidaPorcoes },
+      { nome: "Carne suína (porções, ocasional)", qtd: cont.carneSuinaPorcoes },
+      { nome: "Hambúrguer caseiro (unidades de 150 g)", qtd: cont.hamburgueresUnid },
+      { nome: "Presunto ou peito de peru (ocasional)", qtd: cont.presuntoOcasional }
+    ]},
+    { titulo: "Laticínios", itens: [
+      { nome: "Leite (ml)", qtd: cont.leiteMl },
+      { nome: "Iogurte 170 g (unidades)", qtd: cont.iogurtes170g },
+      { nome: "Queijo (gramas)", qtd: Math.round(cont.queijoG) },
+      { nome: "Creme de queijo (potes/porções)", qtd: cont.creamCheese }
+    ]},
+    { titulo: "Frutas", itens: [
+      { nome: "Maçã (unidades)", qtd: cont.macas },
+      { nome: "Laranja (alguns dias, opcional)", qtd: null, aprox: true }
+    ]},
+    { titulo: "Legumes", itens: [
+      { nome: "Cenoura (unidades)", qtd: null, aprox: true },
+      { nome: "Brócolis", qtd: null, aprox: true },
+      { nome: "Abóbora cabotiá (colheres de sopa)", qtd: cont.colheresAbobora },
+      { nome: "Ervilha", qtd: null, aprox: true },
+      { nome: "Milho (complemento)", qtd: null, aprox: true },
+      { nome: "Legumes para acompanhamento (colheres de sopa, total semana)", qtd: Math.round(cont.colheresLegumes) }
+    ]},
+    { titulo: "Mercearia", itens: [
+      { nome: "Arroz (colheres de sopa, total semana)", qtd: cont.colheresArroz },
+      { nome: "Feijão preto (conchas pequenas, total semana)", qtd: cont.conchasFeijao },
+      { nome: "Batata (unidades médias)", qtd: cont.batatas },
+      { nome: "Goma de tapioca (gramas)", qtd: Math.round(cont.tapiocaG) },
+      { nome: "Macarrão (ocasional)", qtd: cont.macarraoOcasional },
+      { nome: "Café (xícaras/porções)", qtd: cont.cafeXicaras },
+      { nome: "Batata para purê (unidades)", qtd: cont.pureBatata }
+    ]},
+    { titulo: "Suplementos", itens: [
+      { nome: "Whey protein (doses)", qtd: cont.dosesWhey },
+      { nome: "Creatina", qtd: null, aprox: true }
+    ]},
+    { titulo: "Itens opcionais", itens: [
+      { nome: "Chia", qtd: null, aprox: true },
+      { nome: "Cacau em pó", qtd: null, aprox: true },
+      { nome: "Orégano", qtd: null, aprox: true },
+      { nome: "Farinha de linhaça", qtd: null, aprox: true }
+    ]}
+  ];
+
+  return categorias;
+}
+
+function renderizarListaCompras(){
+  const categorias = gerarListaDeCompras();
+  const container = document.getElementById("listaCompras");
+  container.innerHTML = categorias.map((cat, ci) => `
+    <div class="compras-categoria">
+      <h3>${cat.titulo}</h3>
+      ${cat.itens.filter(it => it.qtd === null || it.qtd > 0).map((it, ii) => {
+        const chave = "cat" + ci + "_it" + ii;
+        const marcado = !!estado.comprasMarcadas[chave];
+        const qtdTexto = it.aprox
+          ? '<span class="compras-aprox">Quantidade aproximada — conferir conforme o preparo.</span>'
+          : (it.qtd + (Number.isInteger(it.qtd) ? "" : ""));
+        return `<label class="compras-item ${marcado ? 'marcado' : ''}">
+          <input type="checkbox" data-chave="${chave}" ${marcado ? "checked" : ""}>
+          <span>${it.nome}${it.aprox ? "" : ": " + qtdTexto}</span>
+          ${it.aprox ? qtdTexto : ""}
+        </label>`;
+      }).join("")}
+    </div>
+  `).join("");
+
+  container.querySelectorAll("input[type=checkbox]").forEach(chk => {
+    chk.addEventListener("change", () => {
+      estado.comprasMarcadas[chk.dataset.chave] = chk.checked;
+      salvarEstado();
+      renderizarListaCompras();
+    });
+  });
+}
+
+/* ----------------------------------------------------------------------
+   15. PREPARO SEMANAL
+   ---------------------------------------------------------------------- */
+function renderizarPreparo(){
+  const container = document.getElementById("listaPreparo");
+  container.innerHTML = itensPreparoSemanal.map((item, i) => {
+    const marcado = !!estado.preparoMarcado[i];
+    return `<label class="preparo-item ${marcado ? 'marcado' : ''}">
+      <input type="checkbox" data-indice="${i}" ${marcado ? "checked" : ""}>
+      <span>${item}</span>
+    </label>`;
+  }).join("");
+  container.querySelectorAll("input[type=checkbox]").forEach(chk => {
+    chk.addEventListener("change", () => {
+      estado.preparoMarcado[chk.dataset.indice] = chk.checked;
+      salvarEstado();
+      renderizarPreparo();
+    });
+  });
+}
+
+/* ----------------------------------------------------------------------
+   16. RESUMO SEMANAL
+   ---------------------------------------------------------------------- */
+function renderizarResumo(){
+  let totalFeitas = 0, totalPossiveis = 0;
+  let coposTotal = 0;
+  const linhasDias = diasInfo.map(d => {
+    const st = obterRegistro(d.chave);
+    const feitas = Object.values(st.realizadas).filter(Boolean).length;
+    totalFeitas += feitas;
+    totalPossiveis += 6;
+    coposTotal += st.copos;
+    return `<div class="resumo-dia-linha"><span>${d.nome}</span><span>${feitas}/6 refeições · ${st.copos} copos de água</span></div>`;
+  }).join("");
+
+  document.getElementById("resumoGrade").innerHTML = `
+    <div class="resumo-card"><div class="num">${totalFeitas}/${totalPossiveis}</div><div class="rotulo">Refeições realizadas</div></div>
+    <div class="resumo-card"><div class="num">${coposTotal}</div><div class="rotulo">Copos de água na semana</div></div>
+  `;
+  document.getElementById("resumoDias").innerHTML = linhasDias;
+}
+
+/* ----------------------------------------------------------------------
+   17. NAVEGAÇÃO ENTRE VISÕES
+   ---------------------------------------------------------------------- */
+function mudarVisao(visao){
+  ["dia","compras","preparo","resumo","relatorio"].forEach(v => {
+    document.getElementById("visao" + v.charAt(0).toUpperCase() + v.slice(1)).classList.toggle("escondido", v !== visao);
+  });
+  document.querySelectorAll(".aba-visao").forEach(btn => {
+    btn.classList.toggle("ativa", btn.dataset.visao === visao);
+  });
+  if(visao === "compras") renderizarListaCompras();
+  if(visao === "preparo") renderizarPreparo();
+  if(visao === "resumo") renderizarResumo();
+  if(visao === "relatorio") renderizarRelatorioMensal();
+}
+
+document.getElementById("abasVisao").addEventListener("click", (e) => {
+  const btn = e.target.closest(".aba-visao");
+  if(btn) mudarVisao(btn.dataset.visao);
+});
+
+/* ----------------------------------------------------------------------
+   18. RESTAURAR CARDÁPIO ORIGINAL / LIMPAR REGISTROS
+   ---------------------------------------------------------------------- */
+const modal = document.getElementById("modalConfirmacao");
+document.getElementById("btnRestaurar").addEventListener("click", () => modal.classList.add("aberto"));
+document.getElementById("btnCancelarRestaurar").addEventListener("click", () => modal.classList.remove("aberto"));
+document.getElementById("btnConfirmarRestaurar").addEventListener("click", () => {
+  diasInfo.forEach(d => {
+    estado.dias[d.chave].cafe = null;
+    estado.dias[d.chave].lancheTarde = null;
+    estado.dias[d.chave].jantar = null;
+    estado.dias[d.chave].almoco = null;
+  });
+  salvarEstado();
+  modal.classList.remove("aberto");
+  renderizarDia();
+  mostrarToast("Cardápio original restaurado.");
+});
+
+document.getElementById("btnLimparRegistros").addEventListener("click", () => {
+  if(!confirm("Isso vai apagar refeições marcadas, água, observações e avaliações desta semana. O histórico de semanas anteriores (usado no relatório mensal) e as trocas de cardápio não serão afetados. Deseja continuar?")) return;
+  diasInfo.forEach(d => {
+    const dataISO = dataISODoDia(d.chave);
+    delete estado.registros[dataISO];
+  });
+  salvarEstado();
+  renderizarDia();
+  renderizarDiasSemana();
+  renderizarResumo();
+  mostrarToast("Registros desta semana apagados.");
+});
+
+/* ----------------------------------------------------------------------
+   16b. RELATÓRIO MENSAL — agrega o histórico real por data (estado.registros)
+   ---------------------------------------------------------------------- */
+function chaveMesDaData(dataISO){ return dataISO.slice(0,7); } // "AAAA-MM"
+function chaveMesAtual(){ const h = new Date(); return h.getFullYear() + "-" + doisDigitos(h.getMonth()+1); }
+
+function popularSeletorMes(){
+  const input = document.getElementById("seletorMes");
+  if(!input.value) input.value = chaveMesAtual();
+}
+
+function renderizarRelatorioMensal(){
+  popularSeletorMes();
+  const mesSelecionado = document.getElementById("seletorMes").value || chaveMesAtual();
+  const registrosDoMes = Object.values(estado.registros)
+    .filter(r => chaveMesDaData(r.data) === mesSelecionado)
+    .sort((a,b) => a.data.localeCompare(b.data));
+
+  const totalDias = registrosDoMes.length;
+  let totalRealizadas = 0, totalPossiveis = 0, somaCopos = 0, diasComAgua = 0, diasCreatina = 0;
+  const contagemAvaliacao = {};
+
+  registrosDoMes.forEach(r => {
+    const feitas = Object.values(r.realizadas).filter(Boolean).length;
+    totalRealizadas += feitas;
+    totalPossiveis += 6;
+    somaCopos += (r.copos || 0);
+    if((r.copos || 0) > 0) diasComAgua++;
+    if(r.suplementos && r.suplementos.creatina) diasCreatina++;
+    Object.values(r.avaliacao || {}).forEach(lista => {
+      (lista || []).forEach(tag => { contagemAvaliacao[tag] = (contagemAvaliacao[tag] || 0) + 1; });
+    });
+  });
+
+  const mediaCopos = totalDias ? (somaCopos / totalDias).toFixed(1) : "0";
+  const [anoSel, mesNumSel] = mesSelecionado.split("-");
+  const nomeMesSel = nomesMeses[parseInt(mesNumSel, 10) - 1];
+
+  document.getElementById("relatorioFraseTopo").textContent = totalDias > 0
+    ? `Em ${nomeMesSel} de ${anoSel}, você registrou ${totalDias} dia${totalDias === 1 ? "" : "s"}. Cada registro ajuda a enxergar o seu ritmo — sem cobrança.`
+    : `Ainda não há registros para ${nomeMesSel} de ${anoSel}. Assim que você usar a agenda nesses dias, o relatório aparece aqui.`;
+
+  document.getElementById("relatorioGrade").innerHTML = `
+    <div class="resumo-card"><div class="num">${totalDias}</div><div class="rotulo">Dias registrados</div></div>
+    <div class="resumo-card"><div class="num">${totalPossiveis ? totalRealizadas + "/" + totalPossiveis : "—"}</div><div class="rotulo">Refeições realizadas</div></div>
+    <div class="resumo-card"><div class="num">${mediaCopos}</div><div class="rotulo">Média de copos de água/dia</div></div>
+    <div class="resumo-card"><div class="num">${diasComAgua}</div><div class="rotulo">Dias com água registrada</div></div>
+    <div class="resumo-card"><div class="num">${diasCreatina}</div><div class="rotulo">Dias com creatina marcada</div></div>
+  `;
+
+  const listaAvaliacoes = Object.entries(contagemAvaliacao).sort((a,b) => b[1]-a[1]);
+  document.getElementById("relatorioAvaliacoes").innerHTML = listaAvaliacoes.length
+    ? listaAvaliacoes.map(([tag,qtd]) => `<div class="resumo-dia-linha"><span>${tag}</span><span>${qtd}x</span></div>`).join("")
+    : `<p class="preparo-texto" style="margin:0;">Nenhuma avaliação registrada ainda neste mês. Os selos "Gostei", "Não quero repetir" etc. aparecem aqui conforme você for usando a agenda.</p>`;
+
+  document.getElementById("relatorioDias").innerHTML = registrosDoMes.length
+    ? registrosDoMes.map(r => {
+        const feitas = Object.values(r.realizadas).filter(Boolean).length;
+        const [ , m, dd] = r.data.split("-");
+        return `<div class="resumo-dia-linha"><span>${dd}/${m}</span><span>${feitas}/6 refeições · ${r.copos || 0} copos de água</span></div>`;
+      }).join("")
+    : `<p class="preparo-texto" style="margin:0;">Sem dias registrados neste mês.</p>`;
+}
+
+/* ----------------------------------------------------------------------
+   19. IMPRESSÃO
+   ---------------------------------------------------------------------- */
+document.getElementById("btnImprimirDia").addEventListener("click", () => window.print());
+document.getElementById("btnImprimirCompras").addEventListener("click", () => window.print());
+document.getElementById("btnImprimirResumo").addEventListener("click", () => window.print());
+document.getElementById("btnImprimirRelatorio").addEventListener("click", () => window.print());
+document.getElementById("seletorMes").addEventListener("change", renderizarRelatorioMensal);
+
+/* ----------------------------------------------------------------------
+   20. TOAST
+   ---------------------------------------------------------------------- */
+let toastTimeout;
+function mostrarToast(msg){
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.classList.add("mostrar");
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove("mostrar"), 2600);
+}
+
+/* ----------------------------------------------------------------------
+   21. FRASES ACOLHEDORAS DO RODAPÉ
+   ---------------------------------------------------------------------- */
+const frasesRodape = [
+  "Cada refeição é uma nova oportunidade.",
+  "Feito é melhor que perfeito.",
+  "Retome na próxima refeição.",
+  "Seu progresso não precisa ser perfeito."
+];
+document.getElementById("fraseRodape").textContent = frasesRodape[Math.floor(Math.random()*frasesRodape.length)];
+
+/* ----------------------------------------------------------------------
+   22. INICIALIZAÇÃO
+   ---------------------------------------------------------------------- */
+renderizarCabecalho();
+renderizarDiasSemana();
+renderizarDia();
+</script>
+</body>
+</html>
